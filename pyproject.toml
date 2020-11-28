@@ -6,6 +6,7 @@ authors = ["alpden550 <alpden550@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
+trio-websocket = "^0.9.0"
 
 [tool.poetry.dev-dependencies]
 
