@@ -21,11 +21,11 @@ def load_routes(path: str = 'routes', routes_number: int = None):
             yield json.load(file)
 
 
-def generate_bus_id(route_id, bus_index, emulator_id: int = None):
+def generate_bus_id(route_id: str, bus_index: int, emulator_id: int = None):
     return f"{route_id}-{bus_index}-{emulator_id}" if emulator_id else f"{route_id}-{bus_index}"
 
 
-async def run_bus(send_channel, bus_id, bus, coordinates):
+async def run_bus(send_channel: trio.MemorySendChannel, bus_id: str, bus: str, coordinates: list):
     offset = random.randint(0, len(coordinates))
 
     for coordinate in coordinates[offset:]:
@@ -39,7 +39,7 @@ async def run_bus(send_channel, bus_id, bus, coordinates):
         await trio.sleep(0.3)
 
 
-async def send_updates(server: str, receive_channel):
+async def send_updates(server: str, receive_channel: trio.MemoryReceiveChannel):
     async with open_websocket_url(server) as ws:
         async for message in receive_channel:
             await ws.send_message(message)
@@ -78,12 +78,12 @@ async def client(
 @click.option('--emulator_id', '-e', help='Prefix for bus id.', type=int)
 @click.option('--refresh_timeout', '-t', help='Timeout for updating server coordinates', type=int)
 def main(
-    server: str,
-    routes_number: int,
-    buses_per_route: int,
-    websockets_number: int,
-    emulator_id: int,
-    refresh_timeout: int
+        server: str,
+        routes_number: int,
+        buses_per_route: int,
+        websockets_number: int,
+        emulator_id: int,
+        refresh_timeout: int
 ):
     with suppress(KeyboardInterrupt):
         trio.run(
