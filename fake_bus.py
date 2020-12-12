@@ -14,16 +14,17 @@ def load_routes(path='routes'):
 
 
 async def run_bus(ws, bus, coordinates):
-    for coordinate in coordinates:
-        message = json.dumps({
-            "busId": f'{bus}-0',
-            "lat": coordinate[0],
-            "lng": coordinate[1],
-            "route": bus,
-        }, ensure_ascii=False)
+    while True:
+        for coordinate in coordinates:
+            message = json.dumps({
+                "busId": f'{bus}-0',
+                "lat": coordinate[0],
+                "lng": coordinate[1],
+                "route": bus,
+            }, ensure_ascii=False)
 
-        await ws.send_message(message)
-        await trio.sleep(0.5)
+            await ws.send_message(message)
+            await trio.sleep(0.1)
 
 
 async def client():
