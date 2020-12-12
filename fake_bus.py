@@ -21,8 +21,8 @@ def load_routes(path: str = 'routes', routes_number: int = None):
             yield json.load(file)
 
 
-def generate_bus_id(route_id, bus_index):
-    return f"{route_id}-{bus_index}"
+def generate_bus_id(route_id, bus_index, emulator_id: int = None):
+    return f"{route_id}-{bus_index}-{emulator_id}" if emulator_id else f"{route_id}-{bus_index}"
 
 
 async def run_bus(send_channel, bus_id, bus, coordinates):
@@ -45,20 +45,27 @@ async def send_updates(server: str, receive_channel):
             await ws.send_message(message)
 
 
-async def client(server: str, routes_number: int):
+async def client(
+        server: str,
+        routes_number: int,
+        buses_per_route: int,
+        websockets_number: int,
+        emulator_id: int,
+        refresh_timeout: int
+):
     routes = load_routes(routes_number=routes_number)
 
     async with trio.open_nursery() as nursery:
         send_channels = []
-        for _ in range(4):
+        for _ in range(websockets_number):
             send_channel, receive_channel = trio.open_memory_channel(0)
             send_channels.append(send_channel)
             nursery.start_soon(send_updates, server, receive_channel)
         channel_choices = cycle(send_channels)
 
         for route in routes:
-            for index in range(5):
-                bus_id = generate_bus_id(route['name'], index)
+            for index in range(buses_per_route):
+                bus_id = generate_bus_id(route['name'], index, emulator_id)
                 sender = next(channel_choices)
                 nursery.start_soon(run_bus, sender, bus_id, route['name'], route['coordinates'])
 
@@ -66,9 +73,22 @@ async def client(server: str, routes_number: int):
 @click.command()
 @click.option('--server', '-s', default='ws://127.0.0.1:8080/ws', help='Server address.', type=str)
 @click.option('--routes_number', '-r', help='Routes amount.', type=int)
-def main(server, routes_number):
+@click.option('--buses_per_route', '-b', default=5, help='Buses on an one route.', type=int)
+@click.option('--websockets_number', '-w', default=5, help='Amount of opened websockets.', type=int)
+@click.option('--emulator_id', '-e', help='Prefix for bus id.', type=int)
+@click.option('--refresh_timeout', '-t', help='Timeout for updating server coordinates', type=int)
+def main(
+    server: str,
+    routes_number: int,
+    buses_per_route: int,
+    websockets_number: int,
+    emulator_id: int,
+    refresh_timeout: int
+):
     with suppress(KeyboardInterrupt):
-        trio.run(client, server, routes_number)
+        trio.run(
+            client, server, routes_number, buses_per_route, websockets_number, emulator_id, refresh_timeout
+        )
 
 
 if __name__ == '__main__':
