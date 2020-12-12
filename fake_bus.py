@@ -28,12 +28,12 @@ async def run_bus(ws, bus, coordinates):
 
 
 async def client():
-    buses = load_routes()
+    routes = load_routes()
     try:
         async with open_websocket_url('ws://127.0.0.1:8080/ws') as ws:
             async with trio.open_nursery() as nursery:
-                for bus in buses:
-                    nursery.start_soon(run_bus, ws, bus['name'], bus['coordinates'])
+                for route in routes:
+                    nursery.start_soon(run_bus, ws, route['name'], route['coordinates'])
     except OSError as ose:
         logging.error('Connection attempt failed: %s', ose)
 
