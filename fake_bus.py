@@ -1,7 +1,7 @@
 import json
-import logging
 import pathlib
 import random
+from contextlib import suppress
 from itertools import cycle
 
 import trio
@@ -58,7 +58,8 @@ async def client():
 
 
 def main():
-    trio.run(client)
+    with suppress(KeyboardInterrupt):
+        trio.run(client)
 
 
 if __name__ == '__main__':

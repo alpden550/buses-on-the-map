@@ -1,4 +1,5 @@
 import json
+from contextlib import suppress
 from functools import partial
 
 import trio
@@ -49,7 +50,8 @@ async def server():
 
 
 def main():
-    trio.run(server)
+    with suppress(KeyboardInterrupt):
+        trio.run(server)
 
 
 if __name__ == '__main__':
