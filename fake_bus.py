@@ -9,6 +9,8 @@ import trio
 from loguru import logger
 from trio_websocket import open_websocket_url
 
+from decorators import relaunch_on_disconnect
+
 
 def load_routes(path: str = 'routes', routes_number: int = None):
     if routes_number:
@@ -39,6 +41,7 @@ async def run_bus(send_channel: trio.MemorySendChannel, bus_id: str, bus: str, c
         await trio.sleep(0.3)
 
 
+@relaunch_on_disconnect()
 async def send_updates(server: str, receive_channel: trio.MemoryReceiveChannel):
     async with open_websocket_url(server) as ws:
         async for message in receive_channel:
