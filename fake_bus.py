@@ -2,6 +2,7 @@ import json
 import logging
 import pathlib
 import random
+from itertools import cycle
 
 import trio
 from trio_websocket import open_websocket_url
@@ -18,8 +19,9 @@ def generate_bus_id(route_id, bus_index):
     return f"{route_id}-{bus_index}"
 
 
-async def run_bus(ws, bus_id, bus, coordinates):
+async def run_bus(send_channel, bus_id, bus, coordinates):
     offset = random.randint(0, len(coordinates))
+
     for coordinate in coordinates[offset:]:
         message = json.dumps({
             "busId": bus_id,
@@ -27,22 +29,32 @@ async def run_bus(ws, bus_id, bus, coordinates):
             "lng": coordinate[1],
             "route": bus,
         }, ensure_ascii=False)
-
-        await ws.send_message(message)
+        await send_channel.send(message)
         await trio.sleep(0.3)
+
+
+async def send_updates(receive_channel):
+    async with open_websocket_url('ws://127.0.0.1:8080/ws') as ws:
+        async for message in receive_channel:
+            await ws.send_message(message)
 
 
 async def client():
     routes = load_routes()
-    try:
-        async with open_websocket_url('ws://127.0.0.1:8080/ws') as ws:
-            async with trio.open_nursery() as nursery:
-                for route in routes:
-                    for index, _ in enumerate(range(5)):
-                        bus_id = generate_bus_id(route['name'], index)
-                        nursery.start_soon(run_bus, ws, bus_id, route['name'], route['coordinates'])
-    except OSError as ose:
-        logging.error('Connection attempt failed: %s', ose)
+
+    async with trio.open_nursery() as nursery:
+        send_channels = []
+        for _ in range(4):
+            send_channel, receive_channel = trio.open_memory_channel(0)
+            send_channels.append(send_channel)
+            nursery.start_soon(send_updates, receive_channel)
+        channel_choices = cycle(send_channels)
+
+        for route in routes:
+            for index in range(5):
+                bus_id = generate_bus_id(route['name'], index)
+                sender = next(channel_choices)
+                nursery.start_soon(run_bus, sender, bus_id, route['name'], route['coordinates'])
 
 
 def main():
