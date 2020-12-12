@@ -6,12 +6,17 @@ from itertools import cycle
 
 import click
 import trio
+from loguru import logger
 from trio_websocket import open_websocket_url
 
 
-def load_routes(path='routes'):
+def load_routes(path: str = 'routes', routes_number: int = None):
+    if routes_number:
+        logger.info(f'Will be loaded only {routes_number} first routes from routes.')
     filenames = pathlib.Path(path).glob('*.json')
-    for filename in filenames:
+    for index, filename in enumerate(filenames, start=1):
+        if routes_number and index >= routes_number:
+            break
         with open(filename, encoding='utf8') as file:
             yield json.load(file)
 
