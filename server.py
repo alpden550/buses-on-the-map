@@ -3,7 +3,7 @@ from contextlib import suppress
 from functools import partial
 
 import trio
-from trio_websocket import serve_websocket, ConnectionClosed, WebSocketRequest
+from trio_websocket import serve_websocket, ConnectionClosed, WebSocketRequest, WebSocketConnection
 
 buses = []
 
@@ -39,6 +39,15 @@ async def talk_to_browser(request: WebSocketRequest):
             await trio.sleep(0.1)
         except ConnectionClosed:
             break
+
+
+async def listen_browser(ws: WebSocketConnection):
+    while True:
+        try:
+            message = await ws.get_message()
+            print(message)
+        except ConnectionClosed:
+            pass
 
 
 async def server():
