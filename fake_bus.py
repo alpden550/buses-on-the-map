@@ -23,7 +23,7 @@ async def run_bus(ws, bus, coordinates):
         }, ensure_ascii=False)
 
         await ws.send_message(message)
-        await trio.sleep(1)
+        await trio.sleep(0.5)
 
 
 async def client():
