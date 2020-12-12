@@ -3,12 +3,12 @@ from contextlib import suppress
 from functools import partial
 
 import trio
-from trio_websocket import serve_websocket, ConnectionClosed
+from trio_websocket import serve_websocket, ConnectionClosed, WebSocketRequest
 
 buses = []
 
 
-async def fetch_buses(request):
+async def fetch_buses(request: WebSocketRequest):
     ws = await request.accept()
 
     while True:
@@ -19,7 +19,7 @@ async def fetch_buses(request):
             break
 
 
-def make_bus_message():
+def make_bus_message() -> dict:
     response_message = {
         "msgType": "Buses",
         "buses": []
@@ -29,7 +29,7 @@ def make_bus_message():
     return response_message
 
 
-async def talk_to_browser(request):
+async def talk_to_browser(request: WebSocketRequest):
     ws = await request.accept()
 
     while True:
