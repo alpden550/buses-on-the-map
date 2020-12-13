@@ -38,7 +38,7 @@ async def run_bus(send_channel: trio.MemorySendChannel, bus_id: str, bus: str, c
             "route": bus,
         }, ensure_ascii=False)
         await send_channel.send(message)
-        await trio.sleep(0.3)
+        await trio.sleep(0.5)
 
 
 @relaunch_on_disconnect()
@@ -76,7 +76,7 @@ async def client(
 @click.command()
 @click.option('--server', '-s', default='ws://127.0.0.1:8080/ws', help='Server address.', type=str)
 @click.option('--routes_number', '-r', help='Routes amount.', type=int)
-@click.option('--buses_per_route', '-b', default=5, help='Buses on an one route.', type=int)
+@click.option('--buses_per_route', '-b', default=3, help='Buses on an one route.', type=int)
 @click.option('--websockets_number', '-w', default=5, help='Amount of opened websockets.', type=int)
 @click.option('--emulator_id', '-e', help='Prefix for bus id.', type=int)
 @click.option('--refresh_timeout', '-t', help='Timeout for updating server coordinates', type=int)
