@@ -1,10 +1,33 @@
 import json
 from contextlib import suppress
+from dataclasses import dataclass
 from functools import partial
 
 import trio
 from loguru import logger
 from trio_websocket import serve_websocket, ConnectionClosed, WebSocketRequest, WebSocketConnection
+
+
+@dataclass
+class WindowBounds:
+    south_lat: float
+    north_lat: float
+    west_lng: float
+    east_lng: float
+
+    def update(self, bounds: dict):
+        self.south_lat = bounds.get("south_lat")
+        self.north_lat = bounds.get("north_lat")
+        self.west_lng = bounds.get("west_lng")
+        self.east_lng = bounds.get("east_lng")
+
+    def is_bus_inside(self, bus: str):
+        bus_dict = json.loads(bus)
+        return (
+                (self.south_lat < bus_dict['lat'] < self.north_lat) and (
+                    self.west_lng < bus_dict['lng'] < self.east_lng)
+        )
+
 
 buses = []
 
