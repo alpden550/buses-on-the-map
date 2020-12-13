@@ -50,7 +50,8 @@ def make_bus_message() -> dict:
         "buses": []
     }
     for bus in buses:
-        response_message['buses'].append(json.loads(bus))
+        if browser.is_bus_inside(bus):
+            response_message['buses'].append(json.loads(bus))
     return response_message
 
 
