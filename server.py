@@ -41,7 +41,8 @@ async def fetch_buses(request: WebSocketRequest):
         try:
             message = await ws.get_message()
             buses.append(message)
-        except ConnectionClosed:
+        except ConnectionClosed as error:
+            logger.error(f"Can't getting buses: {error.reason}")
             break
 
 
@@ -61,8 +62,8 @@ async def talk_to_browser(ws: WebSocketConnection):
         try:
             message = make_bus_message()
             await ws.send_message(json.dumps(message))
-        except ConnectionClosed:
-            break
+        except ConnectionClosed as error:
+            logger.error(f"Can't sending buses: {error.reason}")
 
         await trio.sleep(1)
 
