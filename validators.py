@@ -5,7 +5,7 @@ def validate_browser(msg: str) -> dict or None:
     result = {"errors": [], "msgType": "Errors"}
     try:
         message = json.loads(msg)
-    except json.JSONDecodeError:
+    except (json.JSONDecodeError, TypeError):
         result['errors'].append('Requires valid JSON')
         return result
 
