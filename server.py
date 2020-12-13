@@ -8,6 +8,8 @@ import trio
 from loguru import logger
 from trio_websocket import serve_websocket, ConnectionClosed, WebSocketRequest, WebSocketConnection
 
+from validators import validate_browser
+
 
 @dataclass
 class WindowBounds:
@@ -63,15 +65,20 @@ async def talk_to_browser(ws: WebSocketConnection):
             message = make_bus_message()
             await ws.send_message(json.dumps(message))
         except ConnectionClosed as error:
-            logger.error(f"Can't sending buses: {error.reason}")
-
-        await trio.sleep(1)
+            pass
 
 
 async def listen_browser(ws: WebSocketConnection):
     while True:
         try:
             message = await ws.get_message()
+
+            validated_message = validate_browser(message)
+            if validated_message and 'errors' in validated_message:
+                errors = '\n'.join([error for error in validated_message['errors']])
+                logger.error(f'Bad browser message: {errors}')
+                await ws.send_message(json.dumps(validated_message))
+
             new_boundaries = json.loads(message).get('data')
             browser.update(new_boundaries)
         except ConnectionClosed as error:
