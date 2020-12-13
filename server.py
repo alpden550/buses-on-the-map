@@ -60,9 +60,10 @@ async def talk_to_browser(ws: WebSocketConnection):
         try:
             message = make_bus_message()
             await ws.send_message(json.dumps(message))
-            await trio.sleep(1)
         except ConnectionClosed:
             break
+
+        await trio.sleep(1)
 
 
 async def listen_browser(ws: WebSocketConnection):
@@ -71,10 +72,11 @@ async def listen_browser(ws: WebSocketConnection):
             message = await ws.get_message()
             new_boundaries = json.loads(message).get('data')
             browser.update(new_boundaries)
-
         except ConnectionClosed as error:
             logger.error(f'Connection was closed: {error.reason.name}')
             break
+
+        await trio.sleep(1)
 
 
 async def handle_browser(request: WebSocketRequest):
