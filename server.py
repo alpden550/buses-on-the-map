@@ -78,6 +78,7 @@ async def listen_browser(ws: WebSocketConnection):
                 errors = '\n'.join([error for error in validated_message['errors']])
                 logger.error(f'Bad browser message: {errors}')
                 await ws.send_message(json.dumps(validated_message))
+                continue
 
             new_boundaries = json.loads(message).get('data')
             browser.update(new_boundaries)
