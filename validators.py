@@ -1,7 +1,7 @@
 import json
 
 
-def validate_browser(msg: str) -> dict or None:
+def validate_browser(msg: str) -> dict:
     result = {"errors": [], "msgType": "Errors"}
     try:
         message = json.loads(msg)
