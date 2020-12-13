@@ -3,6 +3,7 @@ from contextlib import suppress
 from dataclasses import dataclass
 from functools import partial
 
+import click
 import trio
 from loguru import logger
 from trio_websocket import serve_websocket, ConnectionClosed, WebSocketRequest, WebSocketConnection
@@ -25,7 +26,7 @@ class WindowBounds:
         bus_dict = json.loads(bus)
         return (
                 (self.south_lat < bus_dict['lat'] < self.north_lat) and (
-                    self.west_lng < bus_dict['lng'] < self.east_lng)
+                self.west_lng < bus_dict['lng'] < self.east_lng)
         )
 
 
@@ -87,17 +88,23 @@ async def handle_browser(request: WebSocketRequest):
         nursery.start_soon(listen_browser, ws)
 
 
-async def server():
-    bus_reader = partial(serve_websocket, fetch_buses, '127.0.0.1', 8080, ssl_context=None)
-    bus_writer = partial(serve_websocket, handle_browser, '127.0.0.1', 8000, ssl_context=None)
+async def start_server(server: str, bus_port: int, browser_port: int):
+    bus_reader = partial(serve_websocket, fetch_buses, server, bus_port, ssl_context=None)
+    bus_writer = partial(serve_websocket, handle_browser, server, browser_port, ssl_context=None)
     async with trio.open_nursery() as nursery:
         nursery.start_soon(bus_reader)
         nursery.start_soon(bus_writer)
 
 
-def main():
+@click.command()
+@click.option('--server', '-s', default='127.0.0.1', help='Server address.', type=str, show_default=True)
+@click.option('--bus_port', '-b', default=8080, help='Port to receive buses data.', type=int, show_default=True)
+@click.option(
+    '--browser_port', '-b', default=8000, help='Port to communicate with browser.', type=int, show_default=True
+)
+def main(server: str, bus_port: int, browser_port: int):
     with suppress(KeyboardInterrupt):
-        trio.run(server)
+        trio.run(start_server, server, bus_port, browser_port)
 
 
 if __name__ == '__main__':
