@@ -26,9 +26,9 @@ class WindowBounds:
 
     def is_bus_inside(self, bus: str):
         bus_dict = json.loads(bus)
+        lat, lng = bus_dict['lat'], bus_dict['lng']
         return (
-                (self.south_lat < bus_dict['lat'] < self.north_lat) and (
-                self.west_lng < bus_dict['lng'] < self.east_lng)
+                (self.south_lat < lat < self.north_lat) and (self.west_lng < lng < self.east_lng)
         )
 
 
@@ -64,8 +64,8 @@ async def talk_to_browser(ws: WebSocketConnection):
         try:
             message = make_bus_message()
             await ws.send_message(json.dumps(message))
-        except ConnectionClosed as error:
-            pass
+        except ConnectionClosed:
+            break
 
 
 async def listen_browser(ws: WebSocketConnection):
