@@ -8,7 +8,7 @@ import trio
 from loguru import logger
 from trio_websocket import serve_websocket, ConnectionClosed, WebSocketRequest, WebSocketConnection
 
-from validators import validate_browser
+from validators import validate_browser, validate_bus
 
 
 @dataclass
@@ -36,12 +36,23 @@ buses = []
 browser = WindowBounds(0, 0, 0, 0)
 
 
+async def handle_error(ws: WebSocketConnection, msg: dict):
+    errors = '\n'.join([error for error in msg['errors']])
+    logger.error(f'Bad browser message: {errors}')
+    await ws.send_message(json.dumps(msg))
+
+
 async def fetch_buses(request: WebSocketRequest):
     ws = await request.accept()
 
     while True:
         try:
             message = await ws.get_message()
+            validated_message = validate_bus(message)
+            if validated_message and 'errors' in validated_message:
+                await handle_error(ws, validated_message)
+                continue
+
             buses.append(message)
         except ConnectionClosed as error:
             logger.error(f"Can't getting buses: {error.reason}")
@@ -75,9 +86,7 @@ async def listen_browser(ws: WebSocketConnection):
 
             validated_message = validate_browser(message)
             if validated_message and 'errors' in validated_message:
-                errors = '\n'.join([error for error in validated_message['errors']])
-                logger.error(f'Bad browser message: {errors}')
-                await ws.send_message(json.dumps(validated_message))
+                await handle_error(ws, validated_message)
                 continue
 
             new_boundaries = json.loads(message).get('data')
