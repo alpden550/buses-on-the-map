@@ -30,6 +30,7 @@ class WindowBounds:
 
 
 buses = []
+browser = WindowBounds(0, 0, 0, 0)
 
 
 async def fetch_buses(request: WebSocketRequest):
