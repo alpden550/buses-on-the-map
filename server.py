@@ -68,7 +68,9 @@ async def listen_browser(ws: WebSocketConnection):
     while True:
         try:
             message = await ws.get_message()
-            logger.debug(message)
+            new_boundaries = json.loads(message).get('data')
+            browser.update(new_boundaries)
+
         except ConnectionClosed as error:
             logger.error(f'Connection was closed: {error.__context__}')
 
