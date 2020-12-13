@@ -38,7 +38,6 @@ async def run_bus(send_channel: trio.MemorySendChannel, bus_id: str, bus: str, c
             "route": bus,
         }, ensure_ascii=False)
         await send_channel.send(message)
-        await trio.sleep(0.5)
 
 
 @relaunch_on_disconnect()
