@@ -30,11 +30,11 @@ def generate_bus_id(route_id: str, bus_index: int, emulator_id: int = None):
 async def run_bus(send_channel: trio.MemorySendChannel, bus_id: str, bus: str, coordinates: list):
     offset = random.randint(0, len(coordinates))
 
-    for coordinate in coordinates[offset:]:
+    for lat, lng in coordinates[offset:]:
         message = json.dumps({
             "busId": bus_id,
-            "lat": coordinate[0],
-            "lng": coordinate[1],
+            "lat": lat,
+            "lng": lng,
             "route": bus,
         }, ensure_ascii=False)
         await send_channel.send(message)
