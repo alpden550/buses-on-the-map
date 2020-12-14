@@ -45,6 +45,7 @@ python fake_bus.py
 python fake_bus.py --help
 ```
 
+Открыть файл index.html в браузере.
 
 ## Настройки
 
@@ -94,3 +95,17 @@ python fake_bus.py --help
 ```bash
 pytest
 ```
+
+## Docker
+
+Запустить сервер:
+
+```bash
+docker-compose up -d
+```
+
+Запустить автобусы:
+
+ ```bash
+ docker-compose exec server python fake_bus.py
+ ```
