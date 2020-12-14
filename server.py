@@ -75,6 +75,7 @@ async def talk_to_browser(ws: WebSocketConnection):
         try:
             message = make_bus_message()
             await ws.send_message(json.dumps(message))
+            await trio.sleep(1)
         except ConnectionClosed:
             break
 
