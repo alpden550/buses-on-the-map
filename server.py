@@ -95,8 +95,6 @@ async def listen_browser(ws: WebSocketConnection):
             logger.error(f'Connection was closed: {error.reason.name}')
             break
 
-        await trio.sleep(1)
-
 
 async def handle_browser(request: WebSocketRequest):
     ws = await request.accept()
@@ -115,7 +113,7 @@ async def start_server(server: str, bus_port: int, browser_port: int):
 
 
 @click.command()
-@click.option('--server', '-s', default='127.0.0.1', help='Server address.', type=str, show_default=True)
+@click.option('--server', '-s', default='0.0.0.0', help='Server address.', type=str, show_default=True)
 @click.option('--bus_port', '-b', default=8080, help='Port to receive buses data.', type=int, show_default=True)
 @click.option(
     '--browser_port', '-b', default=8000, help='Port to communicate with browser.', type=int, show_default=True

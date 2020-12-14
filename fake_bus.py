@@ -73,7 +73,7 @@ async def client(
 
 
 @click.command()
-@click.option('--server', '-s', default='ws://127.0.0.1:8080/ws', help='Server address.', type=str, show_default=True)
+@click.option('--server', '-s', default='ws://0.0.0.0:8080/ws', help='Server address.', type=str, show_default=True)
 @click.option('--routes_number', '-r', help='Routes amount.', type=int)
 @click.option('--buses_per_route', '-b', default=3, help='Buses on an one route.', type=int, show_default=True)
 @click.option('--websockets_number', '-w', default=5, help='Amount of opened websockets.', type=int, show_default=True)
